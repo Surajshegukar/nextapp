@@ -1,0 +1,13 @@
+-- CreateTable
+CREATE TABLE `tbl_admins` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(255) NOT NULL,
+    `email` VARCHAR(255) NOT NULL,
+    `password` VARCHAR(255) NOT NULL,
+    `status` INTEGER NOT NULL DEFAULT 1,
+    `is_deleted` INTEGER NOT NULL DEFAULT 0,
+    `created_on` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_on` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

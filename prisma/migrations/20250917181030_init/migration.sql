@@ -1,0 +1,11 @@
+-- AlterTable
+ALTER TABLE `department` MODIFY `status` INTEGER NOT NULL DEFAULT 1,
+    MODIFY `is_deleted` INTEGER NOT NULL DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE `designation` MODIFY `status` INTEGER NOT NULL DEFAULT 1,
+    MODIFY `is_deleted` INTEGER NOT NULL DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE `user` MODIFY `status` INTEGER NOT NULL DEFAULT 1,
+    MODIFY `is_deleted` INTEGER NOT NULL DEFAULT 0;
