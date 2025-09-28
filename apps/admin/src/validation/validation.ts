@@ -1,23 +1,24 @@
 
-import { z } from "zod";
+import { email, z } from "zod";
 
 
-export const userSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  middleName: z.string().optional(),
-  lastName: z.string().min(1, "Last name is required"),
-  userType: z.string().min(1, "Please select a user type"),
-  username: z.string().min(1, "Username is required"),
-  dob: z.string().nonempty("Date of birth is required"),
+export const userSchema = (id?: number) =>
+    z.object({
+
+  full_name: z.string().min(1, "First name is required"),
+  short_description: z.string().min(1, "Short description is required"),
+  description: z.string().min(1, "Description is required"),
   email: z.email("Invalid email address"),
+  job: z.string().min(1, "Job is required"),
+  city: z.string().min(1, "City is required"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  address: z.string().min(5, "Address is required"),
-  image: z
-    .any()
-    .refine((file) => file?.length === 1, "Please upload an image"),
+  image: id
+      ? z.any().optional()
+      : z
+          .any()
+          .refine((file) => file?.length === 1, "Please upload an image"),
 });
-
-export type UserFormData = z.infer<typeof userSchema>;
+export type UserFormData = z.infer<ReturnType<typeof userSchema>>;
 
 
 export const departmentSchema = z.object({
@@ -37,15 +38,43 @@ export const categorySchema = z.object({
 });
 export type CategoryFormData = z.infer<typeof categorySchema>;
 
-export const magazineSchema = z.object({
-  magazine_name: z.string().min(1, "Magazine name is required"),
-  category: z.string().min(1, "Please select category name"),
-  auther: z.string().min(1, "Please select author name"),
-  publish_date: z.string().min(1, "Publish date is required"),
-  duration: z.string().min(1, "Duration is required"),
-  image: z.any().refine((file) => file?.length === 1, "Please upload an image"),
-  short_description: z.string().min(5, "Short description is required"),
-  desc: z.string().min(10, "Content must be at least 10 characters"),
-});
+export const magazineSchema = (id?: number) =>
+  z.object({
+    magazine_name: z.string().min(1, "Magazine name is required"),
+    category_id: z
+      .number()
+      .int()
+      .min(1, "Please select a valid category"),
 
-export type MagazineFormData = z.infer<typeof magazineSchema>;
+    auther_id: z   
+    .number()
+    .int().min(1, "Please select author name"),
+    
+    publish_date: z.string().min(1, "Publish date is required"),
+    duration: z.string().min(1,"Duration is required"),
+    image: id
+      ? z.any().optional() // when editing, image is optional
+      : z
+          .any()
+          .refine((file) => file?.length === 1, "Please upload an image"), // when creating, image required
+    short_description: z.string().min(5, "Short description is required"),
+    description: z.string().min(10, "Content must be at least 10 characters"),
+  });
+
+export type MagazineFormData = z.infer<ReturnType<typeof magazineSchema>>;
+
+
+export const podcastSchema = (id?: number) =>
+  z.object({
+    podcast_name: z.string().min(1, "Podcast name is required"),
+    publish_date: z.string().min(1, "Publish date is required"),
+    duration: z.string().min(1,"Duration is required"),
+    image: id
+      ? z.any().optional() // when editing, image is optional
+      : z
+          .any()
+          .refine((file) => file?.length === 1, "Please upload an image"), // when creating, image required
+    description: z.string().min(10, "Content must be at least 10 characters"),
+  });
+
+export type PodcastFormData = z.infer<ReturnType<typeof podcastSchema>>;

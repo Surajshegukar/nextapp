@@ -1,14 +1,15 @@
 "use client";
 import ComponentCard from '@/components/common/ComponentCard';
 import React from 'react';
-import UserTable from './user-table';
+import PodcastTable from './podcast-table';
 
-export default function UserList() {
+
+export default function PodcastList() {
 
   return (
-    <ComponentCard title="User List">
+    <ComponentCard title="Podcast List">
        <div>
-            <UserTable />
+            <PodcastTable />
        </div>
     </ComponentCard>
   );

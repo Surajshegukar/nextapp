@@ -25,12 +25,12 @@ const MagazineTable: React.FC = () => {
     { name: "Sr. No.", selector: (row) => row[0], width: "80px" },
     {
       name: "Magazine",
-      selector: (row) => (row[2]?.toLowerCase() === "unknown" ? "-" : row[2]),
+      selector: (row) => (row[3]?.toLowerCase() === "unknown" ? "-" : row[3]),
       width: "200px",
     },
     {
       name: "Status",
-      cell: (row) => (row[3] === 1 ? "Active" : "Inactive"),
+      cell: (row) => (row[2] === 1 ? "Active" : "Inactive"),
       width: "200px",
     },
     {
@@ -38,7 +38,7 @@ const MagazineTable: React.FC = () => {
       cell: (row) => (
         <div className="flex justify-center gap-7 items-center w-full">
           <button
-            onClick={() => editItem(row[1], "/add-Magazine")}
+            onClick={() => editItem(row[1], "/add-magazine")}
             title="Edit"
             className="text-green-600 hover:text-green-800"
           >
@@ -52,10 +52,10 @@ const MagazineTable: React.FC = () => {
             <FaTrash size={15} />
           </button>
           <button
-            onClick={() => toggleStatus(row[1], row[3])}
+            onClick={() => toggleStatus(row[1], row[2])}
             className="btn btn-sm btn-info text-[17px]"
           >
-            {row[3] === 1 ? <AiOutlineCheck /> : <AiOutlineClose />}
+            {row[2] === 1 ? <AiOutlineCheck /> : <AiOutlineClose />}
           </button>
         </div>
       ),

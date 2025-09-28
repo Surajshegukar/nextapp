@@ -4,33 +4,38 @@ const prisma = new PrismaClient();
 /**
  * Fetch all magazines
  */
-const getAllMagazines = async (req, res) => {
-  try {
-    const magazines = await prisma.magazine.findMany({
-      where: { is_deleted: 0 },
-      orderBy: { id: "desc" },
-    });
+  const getAllMagazines = async (req, res) => {
+    try {
+      const magazines = await prisma.magazine.findMany({
+        where: { is_deleted: 0 },
+        orderBy: { id: "desc" },
+        include: {
+          category: {
+                select: { id: true, category_name: true }, 
+          },
+        },
+      });
 
-    return res.status(200).json({
-      success: true,
-      message: "Magazines fetched successfully",
-      data: magazines,
-    });
-  } catch (err) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-      data: err.message,
-    });
-  }
-};
+      return res.status(200).json({
+        success: true,
+        message: "Magazines fetched successfully",
+        data: magazines,
+      });
+    } catch (err) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+        data: err.message,
+      });
+    }
+  };
 
 /**
  * Add new magazine
  */
 const addMagazine = async (req, res) => {
   try {
-    const { magazine_name, category, publish_date, auther, short_description, duration } = req.body;
+    const { magazine_name, category_id, publish_date, auther_id, short_description, duration, description } = req.body;
     const image = req.file; // assuming you are using multer for file upload
 
     const existing = await prisma.magazine.findFirst({
@@ -48,12 +53,13 @@ const addMagazine = async (req, res) => {
     const data = await prisma.magazine.create({
       data: {
         magazine_name,
-        category,
+        category_id : Number(category_id),
         publish_date: publish_date ? new Date(publish_date) : null,
-        auther,
+        auther_id:Number(auther_id),
         short_description,
-        duration: Number(duration),
+        duration: duration,
         image: image ? image.filename : null,
+        description
       },
     });
 
@@ -80,6 +86,11 @@ const getMagazineById = async (req, res) => {
   try {
     const magazine = await prisma.magazine.findFirst({
       where: { id: Number(id), is_deleted: 0 },
+      include: {
+        category: {
+              select: { id: true, category_name: true }, 
+        },
+      },
     });
 
     if (!magazine) {
@@ -109,7 +120,7 @@ const getMagazineById = async (req, res) => {
 const updateMagazine = async (req, res) => {
   const { id } = req.params;
   try {
-    const { magazine_name, category, publish_date, auther, short_description, duration } = req.body;
+    const { magazine_name, category_id, publish_date, auther_id, short_description, duration,description } = req.body;
     const image = req.file;
 
     const existing = await prisma.magazine.findFirst({
@@ -132,11 +143,12 @@ const updateMagazine = async (req, res) => {
       where: { id: Number(id) },
       data: {
         magazine_name,
-        category,
+        category_id:Number(category_id),
         publish_date: publish_date ? new Date(publish_date) : null,
-        auther,
+        auther_id,
         short_description,
-        duration: Number(duration),
+        description,
+        duration: duration  ,
         ...(image && { image: image.filename }),
       },
     });
@@ -198,10 +210,10 @@ const getAjaxMagazines = async (req, res) => {
   const length = parseInt(req.body.length) || 10;
   const order = req.body.order || [];
   const searchValue = req.body.search?.value || "";
-  const filteredCategory = req.query?.category || "all";
+  const filteredCategory = req.query?.category_id || "all";
 
   // Columns for sorting (add or adjust fields as needed)
-  const columns = ["magazine_name", "category", "auther", "publish_date", "duration"];
+  const columns = ["magazine_name", "category_id", "auther_id", "publish_date", "duration"];
   const colIndex = order[0]?.column;
   const dir = order[0]?.dir === "asc" ? "asc" : "desc";
   const sortField = colIndex !== undefined ? columns[colIndex] || "id" : "id";
@@ -217,7 +229,7 @@ const getAjaxMagazines = async (req, res) => {
   }
 
   if (filteredCategory !== "all") {
-    whereClause.category = filteredCategory;
+    whereClause.category_id = filteredCategory;
   }
 
   try {
@@ -239,12 +251,14 @@ const getAjaxMagazines = async (req, res) => {
     const data = docs.map((row, i) => [
       i + 1 + start,
       row.id,
+      row.status,
       row.magazine_name,
-      row.category,
-      row.auther,
+      row.category_id,
+      row.auther_id,
       row.publish_date ? row.publish_date.toISOString().split("T")[0] : "",
       row.duration,
       row.image,
+
     ]);
 
     res.json({

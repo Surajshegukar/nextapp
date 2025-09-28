@@ -3,13 +3,13 @@ import { useEffect, useState } from "react";
 interface UseFetchOptions<T> {
   fetchService: () => Promise<T[]>;
   mapLabel: (item: T) => string; // how to extract label
-  mapValue: (item: T) => string | number; // how to extract value
+  mapValue: (item: T) => number; // how to extract value
   onError?: (error: string) => void;
 }
 
 interface LabeledValue {
   label: string;
-  value: string | number;
+  value: number;
 }
 
 export function useLabeledOptions<T>({
@@ -28,7 +28,7 @@ export function useLabeledOptions<T>({
         const result = await fetchService();
         const mapped = result.map((item) => ({
           label: mapLabel(item),
-          value: mapValue(item),
+          value: Number(mapValue(item)),
         }));
         setOptions(mapped);
       } catch (err: any) {
@@ -41,7 +41,7 @@ export function useLabeledOptions<T>({
     };
 
     fetchData();
-  }, [fetchService, mapLabel, mapValue, onError]);
+  }, []);
 
   return { options, loading, error };
 }

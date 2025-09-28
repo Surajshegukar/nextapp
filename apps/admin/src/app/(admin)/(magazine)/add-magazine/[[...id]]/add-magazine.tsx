@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import FormGroup from "@/components/form/FormGroup";
 import { MagazineFormData, magazineSchema } from "@/validation/validation";
-import { addMagazine, getAllCategorys, getMagazineById, submitMagazine, uniqueMagazine } from "@/services/services";
+import { addMagazine, getAllCategorys, getAllUsers, getMagazineById, submitMagazine, uniqueMagazine } from "@/services/services";
 import { useFetchById } from "@/hooks/useFetchById";
 import { useParams, useRouter } from "next/navigation";
 import { useUniqueCheck } from "@/hooks/useUniqueCheck";
@@ -33,26 +33,40 @@ export default function AddMagazineForm() {
   const id = useParams().id as number | undefined;
   const { message, setMessage } = useToastMessage();
   const navigate = useRouter();
-  const [imagePreview,setImagePreview] = useState("");
+  const [imagePreview, setImagePreview] = useState(null);
+  const [editorKey, setEditorKey] = useState(0);
+  // const authorOptions = [
+  //   { value: 0, label: "Admin" },
+  //   { value: 1, label: "User" },
+  //   { value: 2, label: "Developer" },
+  // ];
 
-const authorOptions = [
-  { value: "Admin", label: "Admin" },
-  { value: "User", label: "User" },
-  { value: "Developer", label: "Developer" },
-];
+  const mapCategoryLabel = (item: { category_name: any; }) => item.category_name;
+  const mapCategoryValue = (item: { id: any; }) => Number(item.id);
 
-// const mapCategoryLabel = (item: { category_name: any; }) => item.category_name;
-// const mapCategoryValue = (item: { id: any; }) => String(item.id);
+  const { options: categoryOptions } = useLabeledOptions({
+    fetchService: async () => {
+      const res = await getAllCategorys();
+      return res.data.data; // assuming categories are in res.data.data
+    },
+    mapLabel: mapCategoryLabel,
+    mapValue: (item) => Number(mapCategoryValue(item)), // Ensure value is always string
+    onError: (err) => console.error(err),
+  });
 
-// const { options: categoryOptions } = useLabeledOptions({
-//   fetchService: async () => {
-//     const res = await getAllCategorys();
-//     return res.data.data; // assuming categories are in res.data.data
-//   },
-//   mapLabel: mapCategoryLabel,
-//   mapValue: (item) => String(mapCategoryValue(item)), // Ensure value is always string
-//   onError: (err) => console.error(err),
-// });
+    const mapUserLabel = (item: { full_name: any; }) => item.full_name;
+  const mapUserValue = (item: { id: any; }) => Number(item.id);
+
+  const { options: userOptions } = useLabeledOptions({
+    fetchService: async () => {
+      const res = await getAllUsers();
+      return res.data.data; // assuming categories are in res.data.data
+    },
+    mapLabel: mapUserLabel,
+    mapValue: (item) => Number(mapUserValue(item)), // Ensure value is always string
+    onError: (err) => console.error(err),
+  });
+
 
 
 
@@ -64,15 +78,16 @@ const authorOptions = [
     reset,
     formState: { errors, isSubmitting },
   } = useForm<MagazineFormData>({
-    resolver: zodResolver(magazineSchema),
+    resolver: zodResolver(magazineSchema(id)),
     defaultValues: {
       magazine_name: "",
-      category: "",
-      publish_date: "",
-      auther: "",
+      category_id: 0,
+      publish_date: "",     
+      auther_id: 0,
       image: null,
       short_description: "",
-      duration: "" 
+      duration: "",
+      description: ""
 
     },
     mode: "onBlur",
@@ -83,15 +98,16 @@ const authorOptions = [
   const setFormData = useCallback((data: any) => {
     reset({
       magazine_name: data.magazine_name,
-      category: data.category,
+      category_id: data.category_id,
       publish_date: data.publish_date,
-      auther: data.auther,
+      auther_id: data.auther_id,
       image: data.image,
       short_description: data.short_description,
       duration: data.duration,
-      desc: data.desc
+      description: data.description
     });
     setImagePreview(data.image);
+    setEditorKey((k) => k + 1);
   }, [reset]);
 
   // Pass a stable service function (not inline arrow)
@@ -124,22 +140,30 @@ const authorOptions = [
     try {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
- 
+
         if (key === "image" && value instanceof FileList && value.length > 0) {
           formData.append(key, value[0]);
-          
+
         } else if (value !== undefined && value !== null) {
           formData.append(key, String(value));
         }
       });
 
-      const res = await submitMagazine( id , formData);
+      const res = await submitMagazine(id, formData);
       const result = res.data;
       if (!res.data.success) throw new Error(result.message || "Failed to add magazine");
       setMessage({ type: "success", text: "Magazine added successfully!" });
 
       reset({
         magazine_name: "",
+        category_id: 0,
+        publish_date: "",
+        auther_id: 0,
+        image: null,
+        short_description: "",
+        duration: "",
+        description: ""
+
       });
       setTimeout(() => {
         navigate.push("/magazine-list");
@@ -176,17 +200,17 @@ const authorOptions = [
           <Label>Magazine Category</Label>
           <div className="relative">
             <Controller
-              name="category"
+              name="category_id"
               control={control}
               render={({ field }) => (
                 <Select
-                  options={authorOptions}
+                  options={categoryOptions}
                   placeholder="Select an option"
                   onChange={field.onChange}
                   value={field.value}
                   className="dark:bg-dark-900"
-                  error={errors.category}
-                  errorMessage={errors.category?.message as string}
+                  error={errors.category_id}
+                  errorMessage={errors.category_id?.message as string}
                 />
 
               )}
@@ -216,7 +240,7 @@ const authorOptions = [
         <FormGroup>
           <Label>Duration</Label>
           <Input
-            type="number"
+            type="text"
             placeholder="Enter duration" {...register("duration")}
             error={!!errors.duration}
             errorMessage={
@@ -230,17 +254,17 @@ const authorOptions = [
           <Label>Auther</Label>
           <div className="relative">
             <Controller
-              name="auther"
+              name="auther_id"
               control={control}
               render={({ field }) => (
                 <Select
-                  options={authorOptions}
+                  options={userOptions}
                   placeholder="Select an option"
                   onChange={field.onChange}
                   value={field.value}
                   className="dark:bg-dark-900"
-                  error={errors.auther}
-                  errorMessage={errors.auther?.message as string}
+                  error={errors.auther_id}
+                  errorMessage={errors.auther_id?.message as string}
                 />
 
               )}
@@ -250,19 +274,21 @@ const authorOptions = [
 
         </FormGroup>
         <FormGroup>
-            <Label>Upload Magazine Image <Link target="_blank" href={`http://localhost:3000/uploads/images/${imagePreview}`}>Preview Image</Link></Label>
-             <Controller
-              name="image"
-              control={control}
-              render={({ field }) => (
-                <FileInput
-                  onChange={(e) => field.onChange(e.target.files)}
-                  error={!!errors.image}
-                  errorMessage={errors.image?.message as string}
-                />
-              )}
-            />
-          </FormGroup>
+          <Label>Upload Magazine Image {
+            imagePreview && <Link target="_blank" href={`http://localhost:3000/uploads/images/${imagePreview}`}>Preview Image</Link>
+            }</Label>
+          <Controller
+            name="image"
+            control={control}
+            render={({ field }) => (
+              <FileInput
+                onChange={(e) => field.onChange(e.target.files)}
+                error={!!errors.image}
+                errorMessage={errors.image?.message as string}
+              />
+            )}
+          />
+        </FormGroup>
         <FormGroup>
           <Label>Short Description</Label>
           <Controller
@@ -285,10 +311,11 @@ const authorOptions = [
         <FormGroup className="col-span-3">
           <Label>Description</Label>
           <Controller
-            name="desc"
+            name="description"
             control={control}
             render={({ field, fieldState }) => (
               <TextEditorInput
+                key={editorKey}
                 value={field.value || ""}
                 onChange={field.onChange}
                 error={
@@ -306,7 +333,5 @@ const authorOptions = [
     </ComponentCard>
   );
 }
-function fetchCategories(): Promise<any[]> {
-  throw new Error("Function not implemented.");
-}
+
 

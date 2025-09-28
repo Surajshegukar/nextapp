@@ -1,5 +1,5 @@
-import AddUserForm from "./add-user";
 
+import UserList from "./user-list";
 
 export const metadata = {
   title: "Add User | Admin Panel",
@@ -25,5 +25,5 @@ export const metadata = {
 };
 
 export default function Page() {
-  return <AddUserForm />;
+  return <UserList />;
 }

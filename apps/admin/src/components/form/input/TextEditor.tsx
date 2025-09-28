@@ -25,9 +25,9 @@ const TextEditorInput: React.FC<TextEditorInputProps> = ({ value, onChange, erro
           toolbarButtonSize: "small",
           height: 300,
         }}
-        onBlur={(newContent) => onChange(newContent)}
+      onBlur={(content: string) => onChange(content)}
       />
-      {error && <p className="text-red-500 mt-1 text-sm">{error.message}</p>}
+      {error && <p className="text-red-500 mt-1 text-xs">{error.message}</p>}
     </div>
   );
 };

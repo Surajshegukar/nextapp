@@ -10,78 +10,69 @@ datasource db {
 model Department {
   id               Int          @id @default(autoincrement())
   department_name  String       @db.VarChar(50)
-
-  // 1 = ACTIVE, 0 = INACTIVE
   status           Int          @default(1)
-
-  // 0 = NOT_DELETED, 1 = DELETED
   is_deleted       Int          @default(0)
-
   created_on       DateTime     @default(now())
   updated_on       DateTime     @updatedAt
-  Designations     Designation[]
-  Users            User[]       @relation("UserDepartment")
 }
 
 model Category {
   id               Int          @id @default(autoincrement())
   category_name  String       @db.VarChar(50)
-
-  // 1 = ACTIVE, 0 = INACTIVE
   status           Int          @default(1)
-
-  // 0 = NOT_DELETED, 1 = DELETED
   is_deleted       Int          @default(0)
 
   created_on       DateTime     @default(now())
   updated_on       DateTime     @updatedAt
+  Magazine Magazine[]
 }
 
-model Designation {
-  id               Int          @id @default(autoincrement())
-  designation_name String       @db.VarChar(50)
-  status           Int          @default(1)
-  is_deleted       Int          @default(0)
-  created_on       DateTime     @default(now())
-  updated_on       DateTime     @updatedAt
-  departmentId     Int
-  Department       Department   @relation(fields: [departmentId], references: [id])
-  Users            User[]       @relation("UserDesignation")
-}
 
 model User {
-  id              Int          @id @default(autoincrement())
-  first_name      String       @db.VarChar(100)
-  middle_name     String?      @db.VarChar(100)
-  last_name       String       @db.VarChar(100)
-  role            String       @default("USER") @db.VarChar(20)
-  dob             DateTime?    @db.Date
-  username        String       @db.VarChar(100)
-  email           String       @unique
-  password        String
-  status          Int          @default(1)     // 1 = ACTIVE, 0 = INACTIVE
-  is_deleted      Int          @default(0)     // 0 = NOT_DELETED, 1 = DELETED
-  created_on      DateTime     @default(now())
-  updated_on      DateTime     @updatedAt
-
-  department_id   Int
-  designation_id  Int
-
-  department      Department   @relation("UserDepartment", fields: [department_id], references: [id])
-  designation     Designation  @relation("UserDesignation", fields: [designation_id], references: [id])
+  id                Int       @id @default(autoincrement())
+  full_name         String    @db.VarChar(100)
+  image             String?   
+  job             String?   
+  city             String? 
+  short_description String?   @db.Text
+  description       String?   @db.Text
+  email             String   
+  password          String
+  status            Int       @default(1)      // 1 = ACTIVE, 0 = INACTIVE
+  is_deleted        Int       @default(0)      // 0 = NOT_DELETED, 1 = DELETED
+  created_on        DateTime  @default(now())
+  updated_on        DateTime  @updatedAt
+  Magazine Magazine[]
 }
 
 model Magazine {
   id               Int      @id @default(autoincrement())
   magazine_name    String
-  category         String?
+  category_id       Int?
+ category      Category? @relation(fields: [category_id], references: [id])
   publish_date     DateTime?
-  auther           String?
-  short_description String?
-  duration         Int?
+  auther_id      Int?
+  auther         User? @relation(fields: [auther_id], references: [id])
+  short_description String? @db.Text  
+  description String? @db.Text  
+  duration         String?
   image            String?
-    status          Int          @default(1)     // 1 = ACTIVE, 0 = INACTIVE
+  status          Int          @default(1)     // 1 = ACTIVE, 0 = INACTIVE
   is_deleted      Int          @default(0)     // 0 = NOT_DELETED, 1 = DELETED
   created_on      DateTime     @default(now())
   updated_on      DateTime     @updatedAt
+}
+
+
+model Podcast {
+  id                        Int      @id @default(autoincrement())
+  podcast_name    String
+  publish_date       DateTime?
+  duration              String?
+  image                  String?
+  description          String? @db.Text  
+  status                   Int          @default(1)     // 1 = ACTIVE, 0 = INACTIVE
+  is_deleted            Int          @default(0)     // 0 = NOT_DELETED, 1 = DELETED
+  created_on          DateTime     @default(now())
+  updated_on        DateTime     @updatedAt
 }

@@ -4,15 +4,15 @@ import ReactSelect, { Props as RSProps } from "react-select";
 import { FieldError } from "react-hook-form";
 
 interface Option {
-  value: string;
+  value: number;
   label: string;
 }
 
 interface SelectProps {
   options: Option[];
   placeholder?: string;
-  value?: string; // controlled value from React Hook Form
-  onChange: (value: string) => void;
+  value?: number; // controlled value from React Hook Form
+  onChange: (value: number) => void;
   className?: string;
   disabled?: boolean;
   error?: FieldError | boolean;
@@ -35,11 +35,14 @@ const Select: React.FC<SelectProps> = ({
   return (
     <div className={`${className}`}>
       <ReactSelect
-        options={options}
+        options={[{
+          value: 0,
+          label:placeholder
+        },...options]}
         value={selectedOption}
         onChange={(selected) => {
           if (selected) onChange(selected.value);
-          else onChange("");
+          else onChange(0);
         }}
         isDisabled={disabled}
         placeholder={placeholder}

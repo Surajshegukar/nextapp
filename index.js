@@ -11,10 +11,10 @@ const prisma = require('./config/prisma.js'); // Prisma client
 // API routes
 const departmentRoutes = require('./routes/department_routes');
 const commonRoutes = require('./routes/common_routes');
-const authRoutes = require('./routes/auth_routes');
+const userRoutes = require('./routes/user_routes.js');
 const categoryRoutes = require('./routes/category_routes');
 const magazineRoutes = require('./routes/magazine_routes');
-
+const podcastRoutes = require('./routes/podcast_routes');
 // Load environment variables
 dotenv.config({
   path:
@@ -40,7 +40,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(
   cors({
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    origin: ['http://localhost:3000', 'http://localhost:3001','http://localhost:3002'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   })
@@ -54,7 +54,8 @@ app.use('/api', commonRoutes);
 app.use('/api/department', departmentRoutes);
 app.use('/api/category', categoryRoutes);
 app.use('/api/magazine',magazineRoutes);
-// app.use('/api/auth', authRoutes);
+app.use('/api/podcast',podcastRoutes);
+app.use('/api/user', userRoutes);
 
 if (!dev) {
   // Serve static files from the React app in production

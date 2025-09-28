@@ -47,6 +47,7 @@ const getUploader = () => {
   const fileFilter = (req, file, cb) => {
     const allowedMimeTypes = [
       "image/jpeg",
+      "image/webp",
       "image/png",
       "image/jpg",
       "application/pdf",

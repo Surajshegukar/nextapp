@@ -13,8 +13,12 @@ const getPrismaModel = (modelName) => {
       return prisma.category;
     case "article":
       return prisma.article;
-        case "magazine":
+    case "magazine":
       return prisma.magazine;
+    case "podcast":
+      return prisma.podcast;
+        case "user":
+      return prisma.user;
     default:
       return null;
   }
